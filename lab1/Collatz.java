@@ -3,14 +3,19 @@
  */
 public class Collatz {
 
-    /** Buggy implementation of nextNumber! */
+    public static boolean isOddNumber(int n) {
+        return n % 2 != 0;
+    }
+
+    /** Returns the nextNumber in a Collatz sequence. */
     public static int nextNumber(int n) {
-        if (n  == 128) {
+        if (n == 1) {
             return 1;
-        } else if (n == 5) {
+        }
+        if (isOddNumber(n)){
             return 3 * n + 1;
         } else {
-            return n * 2;
+            return n / 2;
         }
     }
 
