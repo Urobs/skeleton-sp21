@@ -1,11 +1,12 @@
 package game2048;
 
 import java.util.Formatter;
+import java.util.Iterator;
 import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author Faiz
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -137,7 +138,11 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
+        Iterator<Tile> it = b.iterator();
+        while (it.hasNext()) {
+            if (it.next() == null)
+                return true;
+        }
         return false;
     }
 
@@ -147,7 +152,12 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+    Iterator<Tile> it = b.iterator();
+        while (it.hasNext()) {
+            Tile nextTile = it.next();
+            if (nextTile != null && nextTile.value() == MAX_PIECE)
+                return true;
+        }
         return false;
     }
 
@@ -158,7 +168,27 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        if (emptySpaceExists(b)) return true;
+        // scan by line
+        for (int rowIndex = 0; rowIndex < b.size(); rowIndex += 1) {
+            Tile seen = b.tile(0, rowIndex);
+            for (int colIndex = 1; colIndex < b.size(); colIndex += 1) {
+                if(b.tile(colIndex, rowIndex).value() == seen.value()) {
+                    return true;
+                }
+                seen = b.tile(colIndex, rowIndex);
+            }
+        }
+        // scan by column
+        for (int colIndex =0; colIndex < b.size(); colIndex += 1) {
+            Tile seen = b.tile(colIndex, 0);
+            for (int rowIndex = 1; rowIndex < b.size(); rowIndex += 1) {
+                if(b.tile(colIndex, rowIndex).value() == seen.value()) {
+                    return true;
+                }
+                seen = b.tile(colIndex, rowIndex);
+            }
+        }
         return false;
     }
 
