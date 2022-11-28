@@ -1,8 +1,6 @@
 package game2048;
 
-import java.util.Formatter;
-import java.util.Iterator;
-import java.util.Observable;
+import java.util.*;
 
 
 /** The state of a game of 2048.
@@ -94,6 +92,34 @@ public class Model extends Observable {
         checkGameOver();
         setChanged();
     }
+    /** Tilt one column of the board
+     *  if nothing to move, return -1
+     *  if move but did not merge, return 0
+     *  if merged, return the score increment after merge.
+     * **/
+    public int columnTilt(int col, int row, boolean iCanMerge) {
+        if (row == board.size() - 1) return -1;
+        Tile t = board.tile(col, row);
+        int destinationRowIndex = row + 1;
+        while (destinationRowIndex <= board.size() - 1) {
+            Tile currentTile = board.tile(col, destinationRowIndex);
+            if (currentTile != null) {
+                if (!iCanMerge) {
+                    destinationRowIndex = destinationRowIndex - 1;
+                    break;
+                }
+                if (currentTile.value() == t.value()) {
+                    break;
+                }
+            }
+            destinationRowIndex += 1;
+        }
+        if (destinationRowIndex > board.size() - 1) destinationRowIndex = board.size() - 1;
+        if (destinationRowIndex == row) return -1;
+        boolean merged = board.move(col, destinationRowIndex, t);
+        if (merged) return 2 * t.value();
+        return 0;
+    }
 
     /** Tilt the board toward SIDE. Return true iff this changes the board.
      *
@@ -107,6 +133,9 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+
+
+
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
@@ -114,6 +143,33 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+
+        // way to solve(check from column index 3, the coordinate (0, 0) is on left bottom):
+        //   1. check if same value tile which has not been merged on the north direction.
+        //      if so move current tile to the position of tile, then merge destination tile.
+        //      if not check 2.
+        //   2. check if null tiles on the north direction.
+        //      if so move current tile to the null tile with max column index.
+        //      if not then do nothing.
+
+        board.setViewingPerspective(side);
+
+        for (int colIndex = 0; colIndex < board.size(); colIndex += 1) {
+            boolean canIMerge = true;
+            for (int rowIndex = board.size() - 1; rowIndex >= 0; rowIndex -= 1) {
+                if (board.tile(colIndex, rowIndex) == null) continue;
+                int currentScore = columnTilt(colIndex, rowIndex, canIMerge);
+                if (currentScore > 0) {
+                    score += currentScore;
+                    canIMerge = false;
+                } else  {
+                    canIMerge = true;
+                }
+                if (currentScore > -1) changed = true;
+            }
+        }
+        board.setViewingPerspective(Side.NORTH);
+
 
         checkGameOver();
         if (changed) {
