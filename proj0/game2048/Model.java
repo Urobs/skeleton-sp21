@@ -104,13 +104,10 @@ public class Model extends Observable {
         while (destinationRowIndex <= board.size() - 1) {
             Tile currentTile = board.tile(col, destinationRowIndex);
             if (currentTile != null) {
-                if (!iCanMerge) {
+                if (!iCanMerge || currentTile.value() != t.value()) {
                     destinationRowIndex = destinationRowIndex - 1;
-                    break;
                 }
-                if (currentTile.value() == t.value()) {
-                    break;
-                }
+                break;
             }
             destinationRowIndex += 1;
         }
